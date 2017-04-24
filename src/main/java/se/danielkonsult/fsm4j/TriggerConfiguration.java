@@ -4,8 +4,8 @@ import java.util.function.Function;
 
 /**
  * Handles the configuration of one trigger that is valid for a specific state,
- * e.g. the the state class that is the target of the transition, as well as 
- * any guard condition that must evaluate to true for the transition to take place.
+ * e.g. the the state class that is the target when the trigger is fired, as well as 
+ * any guard condition that must evaluate to true for the target state to be selected.
  *
  * @param <TriggerType> The trigger type of the configuration (set by the owning state configuration)
  * @param <ContextType> The context type of the configuration (set by the owning state configuration)
