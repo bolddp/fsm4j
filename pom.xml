@@ -4,6 +4,19 @@
 	<groupId>se.danielkonsult</groupId>
 	<artifactId>fsm4j</artifactId>
 	<version>1.0.0</version>
+	<scm>
+		<url>https://github.com/bolddp/fsm4j</url>
+		<connection>scm:git:git://github.com/bolddp/fsm4j.git</connection>
+		<developerConnection>scm:git:git@github.com:bolddp/fsm4j.git</developerConnection>
+	</scm>
+	<developers>
+		<developer>
+			<email>daniel@danielkonsult.se</email>
+			<name>Daniel Persson</name>
+			<url>https://github.com/bolddp</url>
+			<id>bolddp</id>
+		</developer>
+	</developers>
 	<build>
 		<plugins>
 			<plugin>

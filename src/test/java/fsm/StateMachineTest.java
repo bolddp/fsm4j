@@ -367,4 +367,31 @@ public class StateMachineTest {
         Assert.assertEquals("Entering fsm.states.TestState2", logs[6]);
         Assert.assertEquals("Exiting fsm.states.TestState2", logs[7]);
     }
+    
+    /**
+     * Tests that a trigger that points back to the current state is
+     * handled correctly, e.g. the exiting() and the entering() method
+     * of the same state are called.
+     */
+    @Test
+    public void shouldHandleCircularTrigger() {
+    	TestContext testContext = new TestContext();
+        final StateMachine<TestTrigger, TestContext> sm = new StateMachine<TestTrigger, TestContext>(testContext);
+        
+        sm.state(TestState1.class).isInitialState()
+        	.on(TestTrigger.STATE1_SUCCESS).goesTo(TestState1.class)
+        	.on(TestTrigger.STATE1_FAIL).goesTo(TestState3.class);
+        sm.state(TestState3.class)
+        	.on(TestTrigger.STATE3_SUCCESS).goesTo(TestState4.class);
+        
+        sm.start();
+        sm.trigger(TestTrigger.STATE1_SUCCESS);
+        
+        String[] logs = testContext.getLogs();
+    	
+        Assert.assertEquals(3, logs.length);
+        Assert.assertEquals("Entering fsm.states.TestState1", logs[0]);
+        Assert.assertEquals("Exiting fsm.states.TestState1", logs[1]);
+        Assert.assertEquals("Entering fsm.states.TestState1", logs[2]);
+    }
 }
