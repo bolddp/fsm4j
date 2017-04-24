@@ -16,6 +16,11 @@ import fsm_guice.states.TestState1;
 import fsm_guice.states.TestState2;
 import fsm_guice.states.TestState3;
 
+/**
+ * Tests that incorporate Guice dependency injection into the state
+ * instantiation, making it possible to inject dependencies through
+ * the constructor of the states. 
+ */
 public class GuiceStateMachineTest {
 	
 	private static Injector injector = Guice.createInjector(new AbstractModule() {

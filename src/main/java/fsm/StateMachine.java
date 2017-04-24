@@ -99,7 +99,7 @@ public class StateMachine<TriggerType, ContextType> {
 
         if (triggerConfiguration == null) {
         	// This can happen if the default invalidTriggerHandler has been overridden
-        	// with a handler that doesn't throw an exception, e.g. ignore invalid triggers
+        	// with a handler that doesn't throw an exception, e.g. to simply ignore invalid triggers
         	return;
         }
 

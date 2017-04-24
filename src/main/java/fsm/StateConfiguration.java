@@ -5,6 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * Handles the configuration of one state in the state machine, e.g. the
+ * guarded and unguarded triggers that are valid for the specific state.
+ * Only one state configuration can exist for a specific state in the
+ * state machine. 
+ * 
+ * @param <TriggerType> The trigger type of the configuration (set by the owning state machine)
+ * @param <ContextType> The context type of the configuration (set by the owning state machine)
+ */
 public class StateConfiguration<TriggerType, ContextType> {
 
     private final Class<? extends FsmState<TriggerType, ContextType>> stateClass;
@@ -28,7 +37,7 @@ public class StateConfiguration<TriggerType, ContextType> {
      * Creates, or returns an existing, unguarded trigger configuration on this state configuration.
      * The trigger configuration can then be fitted with a target state configuration through the
      * TriggerConfiguration.goesTo method.  
-     * @param trigger
+     * @param trigger The trigger that this configuration should apply to.
      * @return The created or existing trigger configuration.
      */
     public TriggerConfiguration<TriggerType, ContextType> on(final TriggerType trigger) {
