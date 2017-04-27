@@ -1,6 +1,9 @@
 package se.danielkonsult.fsm4j;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -250,15 +253,21 @@ public class StateMachineTest {
     }
     
     /**
-     * Tests that an invalid trigger can be ignored be nullifying the
-     * invalid trigger handler.
+     * Tests that an invalid trigger can be ignored by applying
+     * a listener.
      */
     @Test
     public void shouldCorrectlyHandleAbsentInvalidTriggerHandler() {
     	// Setup state machine
         final TestContext testContext = new TestContext();
         final StateMachine<TestTrigger, TestContext> sm = new StateMachine<TestTrigger, TestContext>(testContext);
-        sm.setInvalidTriggerHandler(null);
+        sm.setListener(new StateMachineListener<TestTrigger, TestContext>() {
+        	@Override
+        	public void onInvalidTrigger(TestTrigger trigger,
+        			Class<? extends FsmState<TestTrigger, TestContext>> stateClass) {
+        		// Don't do anything
+        	}
+		});
         
         sm.state(TestState1.class).isInitialState()
                 .on(TestTrigger.STATE1_SUCCESS).goesTo(TestState2.class)
@@ -370,6 +379,81 @@ public class StateMachineTest {
         Assert.assertEquals("Exiting TestState8", logs[5]);
         Assert.assertEquals("Entering TestState2", logs[6]);
         Assert.assertEquals("Exiting TestState2", logs[7]);
+    }
+    
+    /**
+     * Tests that a state machine listener gets the transitioning
+     * messages in correct order.
+     */
+    @Test
+    public void shouldReportTransitioning() {
+    	final List<String> transitions = new ArrayList<>();
+    	
+    	TestContext testContext = new TestContext();
+        final StateMachine<TestTrigger, TestContext> sm = new StateMachine<TestTrigger, TestContext>(testContext);
+        sm.setListener(new StateMachineListener<TestTrigger, TestContext>() {
+			@Override
+			public void onTransitioning(Class<? extends FsmState<TestTrigger, TestContext>> sourceState,
+					Class<? extends FsmState<TestTrigger, TestContext>> targetState) {
+				transitions.add(String.format("%s -> %s",
+						sourceState != null ? sourceState.getSimpleName() : "null",
+						targetState != null ? targetState.getSimpleName() : "null"));
+			}
+		});
+        
+        sm.state(TestState1.class).isInitialState()
+        	.on(TestTrigger.STATE1_SUCCESS).goesTo(TestState7.class)
+        	.on(TestTrigger.STATE1_FAIL).goesTo(TestState3.class);
+        sm.state(TestState7.class)
+        	.on(TestTrigger.STATE7_SUCCESS).goesTo(TestState8.class);
+        sm.state(TestState8.class)
+    		.on(TestTrigger.STATE8_SUCCESS).goesTo(TestState2.class);
+        
+        sm.start();
+        sm.trigger(TestTrigger.STATE1_SUCCESS);
+        sm.stop();
+        
+        String[] logs = transitions.toArray(new String[transitions.size()]);
+        
+        Assert.assertEquals(5, logs.length);
+        Assert.assertEquals("null -> TestState1", logs[0]);
+        Assert.assertEquals("TestState1 -> TestState7", logs[1]);
+        Assert.assertEquals("TestState7 -> TestState8", logs[2]);
+        Assert.assertEquals("TestState8 -> TestState2", logs[3]);
+        Assert.assertEquals("TestState2 -> null", logs[4]);
+    }
+
+    /**
+     * Tests that the listener is notified of an invalid trigger.
+     */
+    @Test
+    public void shouldReportInvalidTrigger() {
+    	AtomicReference<Boolean> correctlyReported = new AtomicReference<Boolean>(false);
+    	
+    	TestContext testContext = new TestContext();
+        final StateMachine<TestTrigger, TestContext> sm = new StateMachine<TestTrigger, TestContext>(testContext);
+        sm.setListener(new StateMachineListener<TestTrigger, TestContext>() {
+        	@Override
+        	public void onInvalidTrigger(TestTrigger trigger,
+        			Class<? extends FsmState<TestTrigger, TestContext>> stateClass) {
+        		if ((trigger == TestTrigger.STATE2_SUCCESS) && (stateClass == TestState1.class)) {
+            		correctlyReported.set(true);
+        		}
+        	}
+		});
+        
+        sm.state(TestState1.class).isInitialState()
+        	.on(TestTrigger.STATE1_SUCCESS).goesTo(TestState7.class)
+        	.on(TestTrigger.STATE1_FAIL).goesTo(TestState3.class);
+        sm.state(TestState7.class)
+        	.on(TestTrigger.STATE7_SUCCESS).goesTo(TestState8.class);
+        sm.state(TestState8.class)
+    		.on(TestTrigger.STATE8_SUCCESS).goesTo(TestState2.class);
+        
+        sm.start();
+        sm.trigger(TestTrigger.STATE2_SUCCESS);
+        
+        Assert.assertTrue(correctlyReported.get());
     }
     
     /**

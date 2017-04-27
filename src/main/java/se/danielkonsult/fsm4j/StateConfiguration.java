@@ -119,9 +119,13 @@ public class StateConfiguration<TriggerType, ContextType> {
 
             return satisfied;
         } else {
-        	// This trigger is not valid for the current class, let the designated handler deal with it
-        	if (stateMachine.getInvalidTriggerHandler() != null) {
-            	stateMachine.getInvalidTriggerHandler().handle(trigger, stateClass);
+        	// This trigger is not valid for the current class, is there a listener that can determine what should happen?
+        	if (stateMachine.getListener() == null) {
+        		// No, throw an exception
+        		throw new FsmException(String.format("Trigger %s is not valid for state %s", trigger, getStateClass().getSimpleName()));
+        	} else {
+        		// Notify listener
+        		stateMachine.getListener().onInvalidTrigger(trigger, getStateClass());
         	}
         	return null;
         }
