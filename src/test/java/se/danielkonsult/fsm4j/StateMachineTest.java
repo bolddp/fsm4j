@@ -263,9 +263,9 @@ public class StateMachineTest {
         final StateMachine<TestTrigger, TestContext> sm = new StateMachine<TestTrigger, TestContext>(testContext);
         sm.setListener(new StateMachineListener<TestTrigger, TestContext>() {
         	@Override
-        	public void onInvalidTrigger(TestTrigger trigger,
+        	public void onInvalidTrigger(TestContext context, TestTrigger trigger,
         			Class<? extends FsmState<TestTrigger, TestContext>> stateClass) {
-        		// Don't do anything
+        		// Don't do anything, just avoid an exception being thrown
         	}
 		});
         
@@ -393,7 +393,8 @@ public class StateMachineTest {
         final StateMachine<TestTrigger, TestContext> sm = new StateMachine<TestTrigger, TestContext>(testContext);
         sm.setListener(new StateMachineListener<TestTrigger, TestContext>() {
 			@Override
-			public void onTransitioning(Class<? extends FsmState<TestTrigger, TestContext>> sourceState,
+			public void onTransitioning(TestContext context,
+					Class<? extends FsmState<TestTrigger, TestContext>> sourceState,
 					Class<? extends FsmState<TestTrigger, TestContext>> targetState) {
 				transitions.add(String.format("%s -> %s",
 						sourceState != null ? sourceState.getSimpleName() : "null",
@@ -434,7 +435,7 @@ public class StateMachineTest {
         final StateMachine<TestTrigger, TestContext> sm = new StateMachine<TestTrigger, TestContext>(testContext);
         sm.setListener(new StateMachineListener<TestTrigger, TestContext>() {
         	@Override
-        	public void onInvalidTrigger(TestTrigger trigger,
+        	public void onInvalidTrigger(TestContext context, TestTrigger trigger,
         			Class<? extends FsmState<TestTrigger, TestContext>> stateClass) {
         		if ((trigger == TestTrigger.STATE2_SUCCESS) && (stateClass == TestState1.class)) {
             		correctlyReported.set(true);

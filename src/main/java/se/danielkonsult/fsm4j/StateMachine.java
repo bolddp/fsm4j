@@ -64,7 +64,7 @@ public class StateMachine<TriggerType, ContextType> {
 	private void notifyOnTransitioning(Class<? extends FsmState<TriggerType, ContextType>> sourceState,
 			Class<? extends FsmState<TriggerType, ContextType>> targetState) {
 		if (listener != null) {
-			listener.onTransitioning(sourceState, targetState);
+			listener.onTransitioning(context, sourceState, targetState);
 		}
 	}
 

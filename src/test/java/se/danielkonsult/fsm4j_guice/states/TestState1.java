@@ -13,6 +13,9 @@ public class TestState1 extends BaseState {
 
 	@Override
 	protected void doEntering(StateMachine<TestTrigger, TestContext> stateMachine, TestContext context) {
+		if (concreteService01.getMessage() != "") {
+			// Using the injected service
+		}
 		context.setConcreteService01Visited(true);
 	}
 	

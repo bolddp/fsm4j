@@ -125,7 +125,7 @@ public class StateConfiguration<TriggerType, ContextType> {
         		throw new FsmException(String.format("Trigger %s is not valid for state %s", trigger, getStateClass().getSimpleName()));
         	} else {
         		// Notify listener
-        		stateMachine.getListener().onInvalidTrigger(trigger, getStateClass());
+        		stateMachine.getListener().onInvalidTrigger(stateMachine.getContext(), trigger, getStateClass());
         	}
         	return null;
         }

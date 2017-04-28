@@ -53,7 +53,6 @@ public abstract class BaseState implements FsmState<TestTrigger, TestContext> {
         }
     }
 
-    @Override
     public boolean getIsCurrent() {
         return isCurrent;
     }
