@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Handles the configuration of one state in the state machine, e.g. the
- * guarded and unguarded triggers that are valid for the specific state.
- * Only one state configuration can exist for a specific state in the
- * state machine. 
- * 
+ * Handles the configuration of one state in the state machine, e.g. the guarded and unguarded triggers that are valid for the
+ * specific state. Only one state configuration can exist for a specific state in the state machine.
+ *
  * @param <TriggerType> The trigger type of the configuration (set by the owning state machine)
  * @param <ContextType> The context type of the configuration (set by the owning state machine)
  */
@@ -34,9 +32,8 @@ public class StateConfiguration<TriggerType, ContextType> {
     }
 
     /**
-     * Creates, or returns an existing, unguarded trigger configuration on this state configuration.
-     * The trigger configuration can then be fitted with a target state configuration through the
-     * TriggerConfiguration.goesTo method.  
+     * Creates, or returns an existing, unguarded trigger configuration on this state configuration. The trigger configuration can
+     * then be fitted with a target state configuration through the TriggerConfiguration.goesTo method.
      * @param trigger The trigger that this configuration should apply to.
      * @return The created or existing trigger configuration.
      */
@@ -60,7 +57,8 @@ public class StateConfiguration<TriggerType, ContextType> {
     public TriggerConfiguration<TriggerType, ContextType> on(final TriggerType trigger, final Function<ContextType, Boolean> guard) {
         // The same trigger mustn't be registered as unguarded already
         if (unguardedTriggerConfigurations.containsKey(trigger)) {
-            throw new FsmException(String.format("Trigger %s has already been registered without guard, cannot add as guarded as well", trigger));
+            throw new FsmException(String
+                    .format("Trigger %s has already been registered without guard, cannot add as guarded as well", trigger));
         }
 
         // Make sure there is a list of guarded configurations for this trigger
@@ -119,15 +117,40 @@ public class StateConfiguration<TriggerType, ContextType> {
 
             return satisfied;
         } else {
-        	// This trigger is not valid for the current class, is there a listener that can determine what should happen?
-        	if (stateMachine.getListener() == null) {
-        		// No, throw an exception
-        		throw new FsmException(String.format("Trigger %s is not valid for state %s", trigger, getStateClass().getSimpleName()));
-        	} else {
-        		// Notify listener
-        		stateMachine.getListener().onInvalidTrigger(stateMachine.getContext(), trigger, getStateClass());
-        	}
-        	return null;
+            // This trigger is not valid for the current class, is there a listener that can determine what should happen?
+            if (stateMachine.getListener() == null) {
+                // No, throw an exception
+                throw new FsmException(
+                        String.format("Trigger %s is not valid for state %s", trigger, getStateClass().getSimpleName()));
+            } else {
+                // Notify listener
+                stateMachine.getListener().onInvalidTrigger(stateMachine.getContext(), trigger, getStateClass());
+            }
+            return null;
         }
+    }
+
+    /**
+     * Gets all state configurations that this state targets through its trigger configurations.
+     */
+    @SuppressWarnings("unchecked")
+    public StateConfiguration<TriggerType, ContextType>[] getTargetStateConfigurations() {
+        final List<StateConfiguration<TriggerType, ContextType>> targetStates = new ArrayList<>();
+        for (final TriggerConfiguration<TriggerType, ContextType> triggerConfiguration : unguardedTriggerConfigurations.values()) {
+            final StateConfiguration<TriggerType, ContextType> target = triggerConfiguration.getTargetStateConfiguration();
+            if (!targetStates.contains(target)) {
+                targetStates.add(target);
+            }
+        }
+        for (final List<TriggerConfiguration<TriggerType, ContextType>> triggerConfigurationList : guardedTriggerConfigurations.values()) {
+            for (final TriggerConfiguration<TriggerType, ContextType> triggerConfiguration : triggerConfigurationList) {
+                final StateConfiguration<TriggerType, ContextType> target = triggerConfiguration.getTargetStateConfiguration();
+                if (!targetStates.contains(target)) {
+                    targetStates.add(target);
+                }
+            }
+        }
+
+        return targetStates.toArray(new StateConfiguration[targetStates.size()]);
     }
 }
